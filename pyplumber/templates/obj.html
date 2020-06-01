@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}PyPlumber{% endblock %}
+
+{% block content %}
+Id: {{ obj.id }}<br>
+Object: {{ obj.repr }}<br>
+Class: {{ obj.class }}<br>
+Dump size: {{ obj.size | filesizeformat }}
+
+<a href="/objgraph/obj/{{ obj.id }}.pdf">pdf</a> <br>
+<img src="/objgraph/obj/{{ obj.id }}.png?depth=5" />
+<ul>
+{% for ref in obj.referents %}
+    <li>
+        {{ ref.size | filesizeformat }} <a href="/obj/{{ ref.id }}">{{ ref.id }}</a>  {{ ref.class }}
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

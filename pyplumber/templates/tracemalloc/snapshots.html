@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}PyPlumber{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col4">
+        <h4>Tracing stats</h4>
+        Tracing: {{ is_tracing }}<br>
+        Traced memory peak: {{ traced_memory_peak | filesizeformat }}<br>
+        Traced memory current: {{ traced_memory_current | filesizeformat }}<br>
+        Tracemalloc memory: {{ tracemalloc_memory | filesizeformat }}<br>
+    </div>
+    <div class="col4">
+        <form id="snapshot-filter">
+            <div class="row">
+                <div class="col6">
+                    <h4>Capture only</h4>
+                    <textarea name="include-filter" onchange="saveToLocalStorage(event)"></textarea>
+                </div>
+                <div class="col1"></div>
+                <div class="col6">
+                    <h4>Exclude</h4>
+                    <textarea name="exclude-filter" onchange="saveToLocalStorage(event)"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="application/javascript">
+    function saveField(formId, fieldName, value) {
+        let key = formId + '/' + fieldName;
+        localStorage.setItem(key, value);
+        console.log(`Saved form field value ${value} to ${key}`);
+    }
+
+    function loadField(formId, fieldName, qsKey) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qsValues = urlParams.getAll(qsKey).join('\n');
+
+        let key = formId + '/' + fieldName;
+        let form = document.getElementById(formId);
+        let value = qsValues || localStorage.getItem(key) || '';
+        //let value = qsValues || '';
+        form[fieldName].value = value;
+        console.log(`Loaded form field value ${value} from ${key}`);
+    }
+
+    function saveToLocalStorage(e) {
+        saveField(e.currentTarget.form.id, e.currentTarget.name, e.currentTarget.value);
+    }
+    
+    function getFilterQs(form) {
+        function getFilters(fieldName, argName) {
+            return form[fieldName].value
+                .split('\n')
+                .map(t => t.trim())
+                .filter(t => t)
+                .map(t => [argName, t])
+        }
+
+        let encodeGetParams = arr => arr.map(el => el.map(encodeURIComponent).join("=")).join("&");
+
+        let incFilter = getFilters("include-filter", "include");
+        let excFilter = getFilters("exclude-filter", "exclude");
+        console.log('inc', incFilter);
+        console.log('exc', excFilter);
+
+        let encoded = encodeGetParams([...incFilter, ...excFilter]);
+        console.log(encoded);
+        return encoded
+    }
+
+    function takeSnapshot(e) {
+        let form = document.getElementById('snapshot-filter');
+        let qs = getFilterQs(form);
+
+        let target = "/take_snapshot?" + qs;
+        console.log(target);
+        window.location = target;
+    }
+
+    document.addEventListener('DOMContentLoaded', function (e) {
+        loadField('snapshot-filter', 'include-filter', 'include');
+        loadField('snapshot-filter', 'exclude-filter', 'exclude');
+    })
+</script>
+
+
+<nav class="buttons">
+    {% if is_tracing %}
+    <a href="javascript:void(0);" onclick="takeSnapshot(event)">Take snapshot</a>
+    <a href="/stop_tracing">Stop tracing</a>
+    {% else %}
+    <a href="/start_tracing">Start tracing</a>
+    <a href="/start_tracing?n_frames=1">1</a>
+    <a href="/start_tracing?n_frames=5">5</a>
+    <a href="/start_tracing?n_frames=10">10</a>
+    <a href="/start_tracing?n_frames=20">20</a>
+    <a href="/start_tracing?n_frames=50">50</a>
+    <a href="/start_tracing?n_frames=100">100</a>
+    <a href="/start_tracing?n_frames=200">200</a>
+    {% endif %}
+</nav>
+
+<div class="small table">
+{% for s in snapshots %}
+    <div class="row">
+        <div class="col1"><a href="/snapshots/{{ s.id }}">{{ s.id }}</a></div>
+        <div class="col2">{{ s.size | filesizeformat }}</div>
+        <div class="col4">{{ s.created.isoformat() }}</div>
+        <div class="col3">
+            <a href="/snapshots/{{ s.id }}">View</a>
+            <a href="/snapshots/{{ s.id }}/download">Download</a>
+            {% if s.previous_snapshot_id %}
+            <a href="/snapshots/{{ s.id }}/diff/{{ s.previous_snapshot_id }}">Diff</a>
+            {% endif %}
+            <a href="/snapshots/{{ s.id }}/delete">Del</a>
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+{% endblock %}

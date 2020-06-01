@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Snapshot {{ snapshot.id }}{% endblock %}
+
+{% block content %}
+<h2>Memory allocation snapshot {{ snapshot.id }}</h2>
+<h3>Snapshot {{ snapshot.id }}</h3>
+Created: {{ snapshot.created }}<br>
+Size: {{ snapshot.size | filesizeformat }}<br>
+<a href="/snapshots/{{ snapshot.id }}">View</a>
+<a href="/snapshots/{{ snapshot.id }}/download">Download</a>
+
+<h3>Statistics</h3>
+<nav class="buttons">
+    <span>Group by:</span>
+    <a href="?key_type=lineno">filename</a>
+    <a href="?key_type=lineno">filename and line number</a>
+    <a href="?key_type=traceback">traceback</a>
+    <a href="?key_type=lineno&cumulative=1">filename, cumulative</a>
+    <a href="?key_type=lineno&cumulative=1">filename and line number, cumulative</a>
+</nav>
+
+<div class="table">
+    <div class="row">
+        <div class="col1" title="Total size of memory blocks in bytes"><b>Size</b></div>
+        <div class="col1" title="Number of memory blocks"><b>Memory blocks</b></div>
+        <div class="col10" title="Traceback where the memory block was allocated"><b>Traceback</b></div>
+    </div>
+    {% for statistic in stats %}
+    <div class="row vertical-items">
+        <div class="row" onclick="toggle('tb-{{ loop.index }}')">
+            <div class="col1"><b>{{ statistic.size | filesizeformat() }}</b></div>
+            <div class="col1">{{ statistic.count }}</div>
+            <div class="col10">{{ statistic.traceback|last }}</div>
+        </div>
+        <pre class="traceback" id="tb-{{ loop.index }}" style="display: none;">{%- for line in statistic.traceback.format() %}
+        {{ line|e }}{%- endfor %}</pre>
+    </div>
+    {% endfor %}
+</div>
+
+<script type="application/javascript">
+    function toggle(id) {
+        let elem = document.getElementById(id);
+        if (elem.style.display === "none") {
+            elem.style.display = "block";
+        } else {
+            elem.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparing {{ new_snapshot.id }} to {{ old_snapshot.id }}{% endblock %}
+
+{% block content %}
+<h2>Diff between {{ new_snapshot.id }} and {{ old_snapshot.id }}</h2>
+<div class="row">
+    <div class="col4">
+        <h3>New snapshot ({{ new_snapshot.id }})</h3>
+        Created: {{ new_snapshot.created }}<br>
+        Size: {{ new_snapshot.size | filesizeformat }}<br>
+        <a href="">View</a>
+        <a href="{{ new_snapshot.id }}/download">Download</a>
+    </div>
+    <div class="col4">
+        <h3>Old snapshot ({{ old_snapshot.id }})</h3>
+        Created: {{ old_snapshot.created }}<br>
+        Size: {{ old_snapshot.size | filesizeformat }}<br>
+        <a href="">View</a>
+        <a href="{{ old_snapshot.id }}/download">Download</a>
+    </div>
+</div>
+
+
+<h3>Statistics</h3>
+<nav class="buttons">
+    <span>Group by:</span>
+    <a href="?key_type=lineno">filename</a>
+    <a href="?key_type=lineno">filename and line number</a>
+    <a href="?key_type=traceback">traceback</a>
+    <a href="?key_type=lineno&cumulative=1">filename, cumulative</a>
+    <a href="?key_type=lineno&cumulative=1">filename and line number, cumulative</a>
+</nav>
+
+<div class="table">
+    <div class="row">
+        <div class="col1"><b>New size</b></div>
+        <div class="col1"><b>Size Diff</b></div>
+        <div class="col1"><b>New count</b></div>
+        <div class="col1"><b>Count diff</b></div>
+        <div class="col10"><b>Trace</b></div>
+    </div>
+    {% for statistic in diff_stats %}
+    <div class="row vertical-items">
+        <div class="row" onclick="toggle('tb-{{ loop.index }}')">
+            <div class="col1"><b>{{ statistic.size | filesizeformat() }}</b></div>
+            <div class="col1"><b>{{ statistic.size_diff | filesizeformat() }}</b></div>
+            <div class="col1">{{ statistic.count }}</div>
+            <div class="col1">{{ statistic.count_diff }}</div>
+            <div class="col10">{{ statistic.traceback|last }}</div>
+        </div>
+        <pre class="traceback" id="tb-{{ loop.index }}" style="display: none;">{%- for line in statistic.traceback.format() %}
+        {{ line|e }}{%- endfor %}</pre>
+    </div>
+    {% endfor %}
+</div>
+
+<script type="application/javascript">
+    function toggle(id) {
+        let elem = document.getElementById(id);
+        if (elem.style.display === "none") {
+            elem.style.display = "block";
+        } else {
+            elem.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

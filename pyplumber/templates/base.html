@@ -1,0 +1,94 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}PyPlumber{% endblock %}</title>
+<!--    <script src="/media/pyplumber.js"></script>-->
+    <style>
+        html, body {
+            font-family: monospace;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        header nav {
+            margin: 0;
+            padding: 20px;
+            background: #CCC;
+        }
+        main {
+            padding: 20px;
+        }
+        div {
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            flex-flow: row;
+            width: 100%;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+        .col1 { width: 8.33%; }
+        .col2 { width: 16.66%; }
+        .col3 { width: 25%; }
+        .col4 { width: 33.33%; }
+        .col5 { width: 41.66%; }
+        .col6 { width: 50%; }
+        .col12 { width: 100%; }
+
+        .small.table {
+            width: 800px;
+        }
+        .table .row {
+            padding: 5px 10px;
+            background: #EEE;
+            margin-bottom: 2px;
+        }
+        .traceback {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            margin: 0;
+            padding: 1em 1em;
+            overflow-x: auto;
+            background: #eeedd2;
+            line-height: 1.5em;
+        }
+        .vertical-items {
+            flex-flow: column !important;
+        }
+        .buttons {
+            width: 100%;
+            margin-bottom: 1em;
+            /*display: flex;*/
+            /*flex-flow: row;*/
+        }
+        .buttons > * {
+            display: inline-block;
+            box-sizing: border-box;
+            text-decoration: none;
+            padding: 0.2em 0.5em;
+            margin: 0.1em 0.1em;
+            align-content: flex-start;
+        }
+        .buttons > a {
+            background: #eae9f4;
+        }
+        textarea {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <span>PyPlumber</span>
+        <a href="/snapshots">[tracemalloc snapshots]</a>
+        <a href="/dump">[GC dump]</a>
+    </nav>
+</header>
+<main>
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

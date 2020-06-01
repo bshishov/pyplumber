@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}PyPlumber{% endblock %}
+
+{% block content %}
+Dump size: {{ dump.size | filesizeformat }}
+<ul>
+{% for object in dump.objects %}
+    <li>
+        {{ object.size | filesizeformat }} <a href="/obj/{{ object.id }}">{{ object.id }}</a> {{ object.class }}
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

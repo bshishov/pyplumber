@@ -57,6 +57,7 @@ class MemoryManager:
         snapshot = tracemalloc.take_snapshot()
 
         if filters:
+            logger.info('Filtering traces...')
             snapshot = snapshot.filter_traces(filters)
 
         snapshot_record = SnapshotRecord(

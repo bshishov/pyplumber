@@ -147,8 +147,8 @@ class PyPlumberApp:
         return {
             'snapshots': self.manager.snapshots,
             'is_tracing': self.manager.is_tracing(),
-            'traced_memory_peak': traced_memory_current,
-            'traced_memory_current': traced_memory_peak,
+            'traced_memory_peak': traced_memory_peak,
+            'traced_memory_current': traced_memory_current,
             'tracemalloc_memory': self.manager.get_tracemalloc_memory()
         }
 
@@ -247,6 +247,11 @@ class PyPlumberApp:
         self.manager.delete_snapshot(snapshot_id)
         return Response.redirect('/snapshots')
 
+    @route('^/snapshots/clear$')
+    def snapshots_clear(self, request: Request, snapshot_id) -> Response:
+        self.manager.clear()
+        return Response.redirect('/snapshots')
+
     @route('^/snapshots/(?P<snapshot_id>[a-z0-9]+)/download$')
     def snapshot_download(self, request: Request, snapshot_id) -> Response:
         snapshot_record = self.manager.get_snapshot(snapshot_id)
@@ -261,7 +266,7 @@ class PyPlumberApp:
         assert OBJGRAPH, 'Python module graphviz is required'
         obj_id = int(obj_id)
         obj = objgraph.at(obj_id)
-        if not obj:
+        if obj is not None:
             raise KeyError(f'No object with id: {obj_id}')
         context = {
             'obj': obj_info(obj)
